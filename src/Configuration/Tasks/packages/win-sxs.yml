@@ -35,7 +35,7 @@ actions:
     weight: 100
     option: 'enable-defender'
 
-  - !writeStatus: {status: "Removing AI components", option: "remove-winsxs-ai"}
+  - !writeStatus: {status: "Removing AI components", option: 'remove-winsxs-ai'}
   - !run:
     path: "%ProgramFiles(x86)%\\Revision Tool"
     exe: "revitool.exe"
@@ -43,3 +43,4 @@ actions:
     wait: true
     runas: currentUserElevated
     weight: 100
+    option: 'remove-winsxs-ai'

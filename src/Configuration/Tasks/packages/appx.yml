@@ -116,13 +116,3 @@ actions:
         'Microsoft.YourPhone',
         'MicrosoftWindows.CrossDevice'
       )
-
-  - !writeStatus: {status: "Removing Recall", option: "remove-appx-recall"}
-  - !powerShell:
-    option: "remove-appx-recall"
-    wait: true
-    exeDir: true
-    errorAction: Ignore
-    weight: 10
-    command: >-
-      .\APPX-REMOVER.ps1 -Packages 'MicrosoftWindows.Client.AIX'
