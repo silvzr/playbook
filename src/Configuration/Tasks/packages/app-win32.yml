@@ -26,7 +26,8 @@ actions:
     command: >-
       .\APPX-REMOVER.ps1 -Packages @(
         'Microsoft.MicrosoftEdge',
-        'Microsoft.MicrosoftEdgeDevToolsClient'
+        'Microsoft.MicrosoftEdgeDevToolsClient',
+        'Microsoft.Edge.GameAssist'
       )
 
   - !file: {path: "%ProgramFiles(x86)%\\Microsoft\\Edge", option: "remove-edge", weight: 50}
