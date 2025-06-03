@@ -11,15 +11,6 @@ actions:
   - !taskKill: {name: "MicrosoftEdge*", errorAction: Ignore, option: "remove-edge"}
   - !taskKill: {name: "setup", errorAction: Ignore, pathContains: "\\Edge", option: "remove-edge"}
 
-  # Remove the new Copilot UWP app before removing Edge to avoid leftovers
-  - !powerShell:
-    option: "remove-edge"
-    exeDir: true
-    errorAction: Ignore
-    weight: 30
-    command: >-
-      .\APPX-REMOVER.ps1 -Packages 'Microsoft.Copilot'
-  
   - !powerShell:
     command: '.\EDGE.ps1 -Mode EdgeBrowser'
     exeDir: true
@@ -34,7 +25,6 @@ actions:
     weight: 30
     command: >-
       .\APPX-REMOVER.ps1 -Packages @(
-        'Microsoft.Copilot',
         'Microsoft.MicrosoftEdge',
         'Microsoft.MicrosoftEdgeDevToolsClient'
       )

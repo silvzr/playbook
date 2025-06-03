@@ -32,6 +32,15 @@ actions:
     weight: 100
     option: 'enable-defender'
 
+  - !writeStatus: {status: "Removing AI components", option: "remove-winsxs-ai"}
+  - !run:
+    path: "%ProgramFiles(x86)%\\Revision Tool"
+    exe: "revitool.exe"
+    args: "winpackage --install ai-removal"
+    wait: true
+    runas: currentUserElevated
+    weight: 100
+
 
 # NOTE: This method of removing system packages is now deprecated and not recommended by Revision, as it is one of the main cause of #49
 
