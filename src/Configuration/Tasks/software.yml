@@ -38,8 +38,8 @@ actions:
     exeDir: true
     exe: "BraveBrowserStandaloneSetupArm64.exe"
     args: "/silent /install"
-    cpuArch: X64
-    weight: Arm64
+    cpuArch: Arm64
+    weight: 150
     option: "browser-brave"
 
   - !status: {status: 'Configuring Brave', option: "browser-brave"}
