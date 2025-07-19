@@ -77,7 +77,30 @@ actions:
     exeDir: true
     runas: currentUserElevated
     option: "configure-wallpaper"
-    weight: 45  
+    weight: 45
+
+  - !powerShell:
+    command: 'Copy-Item -Path .\WALLPAPER.ps1 -Destination "$env:systemroot\Web\Wallpaper\MeetRevision" -Force'
+    exeDir: true
+    option: "configure-wallpaper"
+
+  - !powerShell:
+    command: '.\Set-Theme.ps1 -WallpaperPath "$env:SystemRoot\Web\Wallpaper\MeetRevision\v2\desktop.jpg" -ThemeExportPath "$env:SystemRoot\Resources\Themes\revi.theme" -SystemMode "Dark" -AppMode "Dark"'
+    exeDir: true
+    runas: currentUserElevated
+    option: "configure-wallpaper"
+
+  - !powerShell:
+    exeDir: true
+    oobe: only
+    option: "configure-wallpaper"
+    command: >-
+      $startupPath = Join-Path -Path $env:SystemDrive -ChildPath 'Users\Default\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup'
+      
+      if (-not (Test-Path -Path $startupPath)) {
+        New-Item -ItemType Directory -Path $startupPath -Force | Out-Null
+      }
+      Move-Item -Path .\WallpaperStartup.cmd -Destination $startupPath -Force
 
   # Necessary to refresh start menu entries etc.
   - !appx: {operation: clearCache, name: '*Client.CBS*'}
