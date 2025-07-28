@@ -75,7 +75,7 @@ actions:
   # Disabling core Superfetch components break 'defrag c: -b'
   - !powerShell:
     command: |
-      $path = ${env:ProgramFiles(x86)} + '\Revision Tool\data\flutter_assets\additionals\EnableSF.bat'
+      $path = ${env:ProgramFiles} + '\Revision Tool\data\flutter_assets\additionals\EnableSF.bat'
       Start-Process -FilePath $path -Wait -NoNewWindow
 
   - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Dfrg\BootOptimizeFunction', value: 'Enable', operation: delete}

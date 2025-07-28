@@ -8,7 +8,7 @@ actions:
 
   - !writeStatus: {status: "Removing system packages"}
   - !run:
-    path: "%ProgramFiles(x86)%\\Revision Tool"
+    path: "%ProgramFiles%\\Revision Tool"
     exe: "revitool.exe"
     args: "winpackage --install system-components-removal"
     wait: true
@@ -17,9 +17,9 @@ actions:
 
   - !writeStatus: {status: 'Disabling Windows Defender', option: 'disable-defender'}
   - !run:
-    path: "%ProgramFiles(x86)%\\Revision Tool"
+    path: "%ProgramFiles%\\Revision Tool"
     exe: "revitool.exe"
-    args: "defender disable"
+    args: "defender disable --force"
     wait: true
     runas: currentUserElevated
     weight: 100
@@ -27,7 +27,7 @@ actions:
 
   - !writeStatus: {status: 'Enabling Windows Defender', option: 'enable-defender'}
   - !run:
-    path: "%ProgramFiles(x86)%\\Revision Tool"
+    path: "%ProgramFiles%\\Revision Tool"
     exe: "revitool.exe"
     args: "defender enable"
     wait: true
@@ -37,7 +37,7 @@ actions:
 
   - !writeStatus: {status: "Removing AI components", option: 'remove-winsxs-ai'}
   - !run:
-    path: "%ProgramFiles(x86)%\\Revision Tool"
+    path: "%ProgramFiles%\\Revision Tool"
     exe: "revitool.exe"
     args: "winpackage --install ai-removal"
     wait: true
@@ -47,7 +47,7 @@ actions:
 
   - !writeStatus: {status: "Removing OneDrive WinSxS", option: "remove-onedrive"}
   - !run:
-    path: "%ProgramFiles(x86)%\\Revision Tool"
+    path: "%ProgramFiles%\\Revision Tool"
     exe: "revitool.exe"
     args: "winpackage --install onedrive-removal"
     wait: true
