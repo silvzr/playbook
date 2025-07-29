@@ -177,6 +177,9 @@ actions:
   # === Automatically update maps - Off
   - !registryValue: {path: 'HKLM\SYSTEM\Maps', value: 'AutoUpdateEnabled', type: REG_DWORD, data: '0'}
 
+  # === Resume - Off
+  - !registryValue: {path: 'HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\CrossDeviceResume\Configuration', value: 'IsResumeAllowed', type: REG_DWORD, data: '0'}
+
   # ================
   # === Accounts ===
   # ================
