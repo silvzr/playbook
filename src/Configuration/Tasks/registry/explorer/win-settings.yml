@@ -144,6 +144,20 @@ actions:
   - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Accents\3\Theme0', value: 'Color', type: REG_DWORD, data: '4294901930'}
   - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Accents\3\Theme1', value: 'Color', type: REG_DWORD, data: '4294967064'}
 
+  # === Disable transparency and animations
+  - !registryValue:
+    path: 'HKCU\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize'
+    value: 'EnableTransparency'
+    type: REG_DWORD
+    data: '0'
+    option: 'configure-te'
+  - !registryValue:
+    path: 'HKCU\Control Panel\Desktop\WindowMetrics'
+    value: 'MinAnimate'
+    type: REG_DWORD
+    data: '0'
+    option: 'configure-te'
+
   # === Choose your default app mode - Dark (theme)
   - !registryValue: {path: 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize', value: 'AppsUseLightTheme', type: REG_DWORD, data: '0', option: "configure-darkmode", weight: 70}
   - !registryValue: {path: 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize', value: 'SystemUsesLightTheme', type: REG_DWORD, data: '0', option: "configure-darkmode", weight: 50}
