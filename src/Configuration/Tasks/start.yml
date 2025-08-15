@@ -30,7 +30,6 @@ actions:
 
   # Wakelock modification isn't available in AME Wizard, therefore activating a custom high performance powerplan before we proceed to prevent sleep 
   - !writeStatus: {status: "Configuring a power plan"}
-  - !run: {exe: "powercfg", args: "/hibernate off"}
   # https://github.com/meetrevision/playbook/issues/105
   # - !run: {exe: "powercfg", args: "-restoredefaultschemes"}
   # Delete existing Revision power plan if it exists
