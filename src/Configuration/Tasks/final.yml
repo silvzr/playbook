@@ -100,7 +100,7 @@ actions:
     value: 'RevisionWallpaperStartup'
     type: REG_SZ
     oobe: only
-    data: 'cmd /c start /min "" "%SystemRoot%\Web\Wallpaper\MeetRevision\WallpaperStartup.cmd"'
+    data: 'cmd /c "%SystemRoot%\Web\Wallpaper\MeetRevision\WallpaperStartup.cmd"'
 
   # Necessary to refresh start menu entries etc.
   - !appx: {operation: clearCache, name: '*Client.CBS*'}

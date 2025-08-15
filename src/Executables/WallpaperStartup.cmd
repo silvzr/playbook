@@ -2,7 +2,7 @@
 @echo off &pushd "%~dp0"
 @set batch_args=%*
 @set script_path=%~f0
-@powershell -NoProfile -ExecutionPolicy Bypass -Command "iex (cat -Raw '%~f0'); $scriptPath='%script_path%'; if (Test-Path $scriptPath) { Start-Process cmd -ArgumentList '/c ping localhost -n 3 > nul && del %script_path%' -WindowStyle Hidden }"
+@powershell -NoProfile -ExecutionPolicy Bypass -Command "iex (cat -Raw '%~f0')"
 @exit /b %ERRORLEVEL%
 : #>
 
