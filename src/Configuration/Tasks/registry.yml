@@ -20,7 +20,7 @@ actions:
   - !task: {path: 'Tasks\registry\explorer\start-menu.yml'}
   - !task: {path: 'Tasks\registry\explorer\taskbar.yml'}
   - !task: {path: 'Tasks\registry\explorer\view.yml'}
-  - !task: {path: 'Tasks\registry\explorer\win-settings.yml'}
+  # - !task: {path: 'Tasks\registry\explorer\win-settings.yml'} 
 
   # Privacy
   - !writeStatus: {status: "Configuring Privacy"}
