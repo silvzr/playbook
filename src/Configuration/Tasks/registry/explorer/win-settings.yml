@@ -193,6 +193,8 @@ actions:
 
   # === Resume - Off
   - !registryValue: {path: 'HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\CrossDeviceResume\Configuration', value: 'IsResumeAllowed', type: REG_DWORD, data: '0'}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\PolicyManager\default\Connectivity\DisableCrossDeviceResume', value: 'value', type: REG_DWORD, data: '1'}
+  - !registryValue: {path: 'HKLM\SYSTEM\ControlSet001\Control\FeatureManagement\Overrides\8\1387020943', value: 'EnabledState', type: REG_DWORD, data: '1'} # ID (56517033) found in "C:\Windows\SystemApps\MicrosoftWindows.Client.CBS_cw5n1h2txyewy\appxmanifest.xml" 
 
   # ================
   # === Accounts ===
