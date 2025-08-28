@@ -154,7 +154,7 @@ actions:
   - !registryValue:
     path: 'HKCU\Control Panel\Desktop\WindowMetrics'
     value: 'MinAnimate'
-    type: REG_DWORD
+    type: REG_SZ
     data: '0'
     option: 'configure-te'
 
