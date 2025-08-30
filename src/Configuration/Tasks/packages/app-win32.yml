@@ -54,3 +54,35 @@ actions:
         'OneDrive',
         'microsoft.microsoftskydrive'
       )
+
+  # Teams
+  - !writeStatus: {status: "Removing Teams", option: "remove-teams"}
+  - !taskKill: {name: "Teams", errorAction: Ignore, option: "remove-teams"}
+  - !taskKill: {name: "Update", errorAction: Ignore, option: "remove-teams"}
+  - !taskKill: {name: "ms-teamsupdate", errorAction: Ignore, option: "remove-teams"}
+
+  - !powerShell:
+    option: "remove-teams"
+    wait: true
+    exeDir: true
+    errorAction: Ignore
+    weight: 10
+    command: >-
+      .\APPX-REMOVER.ps1 -Packages @(
+        'MicrosoftTeams',
+        'MSTeams', # New Teams
+        'Flipgrid'
+      )
+  
+  # Microsoft Teams Meeting Add-in for Microsoft Office
+  - !run:
+    option: "remove-teams"
+    wait: true
+    exe: "msiexec.exe"
+    args: "/qn /norestart /X{A7AB73A3-CB10-4AA5-9D38-6AEFFBDE4C91}"
+    weight: 10
+    showError: false
+    runas: currentUserElevated
+
+  # === Prevent automatic Teams installation
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Communications', value: 'ConfigureChatAutoInstall', type: REG_DWORD, data: '0'}

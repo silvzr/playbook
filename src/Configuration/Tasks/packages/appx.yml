@@ -51,13 +51,10 @@ actions:
         'Microsoft.OutlookForWindows',
         'SpotifyAB.SpotifyMusic',
         'OutlookPWA',
-        'Flipgrid',
         'Microsoft.Microsoft3DViewer',
         'Microsoft.Advertising',
         'MixedReality.Portal',
         'Microsoft.MSPaint', # Paint 3D
-        'MicrosoftTeams',
-        'MSTeams', # New Teams
         'Microsoft.StartExperiencesApp'
       )
 

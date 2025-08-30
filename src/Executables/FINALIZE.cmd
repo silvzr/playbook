@@ -88,8 +88,6 @@ netsh interface Teredo set state servername=default >NUL 2>nul
 echo Configuring Windows settings
 net accounts /maxpwage:unlimited
   
-PowerShell -NonInteractive -NoLogo -NoProfile -Command "Disable-MMAgent -mc"
 PowerShell -NonInteractive -NoLogo -NoProfile -Command "Disable-WindowsErrorReporting"
-powershell -NonInteractive -NoLogo -NoProfile Set-ProcessMitigation -Name vgc.exe -Enable CFG
 setx DOTNET_CLI_TELEMETRY_OPTOUT 1
 setx POWERSHELL_TELEMETRY_OPTOUT 1
