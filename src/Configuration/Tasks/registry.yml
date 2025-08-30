@@ -60,7 +60,6 @@ actions:
   # Miscellaneous
   - !task: {path: 'Tasks\registry\misc\classic-photo-viewer.yml'}
   - !task: {path: 'Tasks\registry\misc\deprovisioned-apps.yml'}
-  - !task: {path: 'Tasks\registry\misc\disable-installing-teams.yml'}
   - !task: {path: 'Tasks\registry\misc\disable-logging.yml'}
   - !task: {path: 'Tasks\registry\misc\disable-system-restore-pre-defined-config.yml'}
   - !task: {path: 'Tasks\registry\misc\enable-audio-communications-do-nothing.yml'}
