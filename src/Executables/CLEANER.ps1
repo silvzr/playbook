@@ -49,7 +49,7 @@ Stop-Service -Name "bits" -Force | Out-Null
 Stop-Service -Name "appidsvc" -Force | Out-Null
 Stop-Service -Name "dps" -Force | Out-Null
 Stop-Service -Name "wuauserv" -Force | Out-Null
-Stop-Service -Name "cryptsvc" -Force | Out-Null
+# Stop-Service -Name "cryptsvc" -Force | Out-Null # Intermittent issues stopping this service
 
 Write-Host "Cleaning up leftovers"
 $foldersToRemove = @(
