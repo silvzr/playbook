@@ -11,10 +11,6 @@ actions:
   # === Disable system beeps.
   - !registryValue: {path: 'HKCU\Control Panel\Sound', value: 'Beep', type: REG_SZ, data: 'no'}
   - !registryValue: {path: 'HKU\.DEFAULT\Control Panel\Sound', value: 'Beep', type: REG_SZ, data: 'no'}
-
-  # === Changes the time (milliseconds) it takes for the tooltips to pop up when hovering your mouse over elements to 30 ms. (default = 400 ms)
-  - !registryValue: {path: 'HKCU\Control Panel\Mouse', value: 'MouseHoverTime', type: REG_SZ, data: '30'}
-  - !registryValue: {path: 'HKU\.DEFAULT\Control Panel\Mouse', value: 'MouseHoverTime', type: REG_SZ, data: '30'}
   
   # === Makes the Start Menu appear almost instantly when you click on the Windows icon in the Taskbar.
   - !registryValue: {path: 'HKCU\Control Panel\Desktop', value: 'MenuShowDelay', type: REG_SZ, data: '0'}
