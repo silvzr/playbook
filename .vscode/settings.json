@@ -15,6 +15,7 @@
         "!task: mapping",
         "!download: mapping",
         "!status: mapping",
+        "!software: mapping"
     ],
     "yaml.schemas": {
         "https://json.schemastore.org/github-issue-config.json": "file:///workspaces/playbook/.github/ISSUE_TEMPLATE/config.yml"
