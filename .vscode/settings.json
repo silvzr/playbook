@@ -13,6 +13,8 @@
         "!powerShell: mapping",
         "!writeStatus: mapping",
         "!task: mapping",
+        "!download: mapping",
+        "!status: mapping",
     ],
     "yaml.schemas": {
         "https://json.schemastore.org/github-issue-config.json": "file:///workspaces/playbook/.github/ISSUE_TEMPLATE/config.yml"
