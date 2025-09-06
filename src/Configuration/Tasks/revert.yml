@@ -125,4 +125,6 @@ actions:
   - !registryValue: {path: 'HKCU\Control Panel\Mouse', value: 'MouseHoverTime', type: REG_SZ, data: '400'}
   - !registryValue: {path: 'HKU\.DEFAULT\Control Panel\Mouse', value: 'MouseHoverTime', operation: delete}
   
-  
+  # SafeSearch revert
+  # Web search is not allowed, removing this in case web search gets enabled
+  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search', value: 'ConnectedSearchSafeSearch', operation: delete}
