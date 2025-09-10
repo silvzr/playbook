@@ -30,7 +30,7 @@ actions:
         'Microsoft.Edge.GameAssist'
       )
 
-  - !file: {path: "%ProgramFiles(x86)%\\Microsoft\\Edge", option: "remove-edge", weight: 50}
+  # - !file: {path: "%ProgramFiles(x86)%\\Microsoft\\Edge", option: "remove-edge", weight: 50}
 
 
   # OneDrive

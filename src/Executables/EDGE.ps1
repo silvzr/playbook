@@ -12,10 +12,15 @@ function Uninstall-Process {
 
     $originalNation = [microsoft.win32.registry]::GetValue('HKEY_USERS\.DEFAULT\Control Panel\International\Geo', 'Nation', [Microsoft.Win32.RegistryValueKind]::String)
 
-    # Set Nation to 84 (France) temporarily
-    [microsoft.win32.registry]::SetValue('HKEY_USERS\.DEFAULT\Control Panel\International\Geo', 'Nation', 84, [Microsoft.Win32.RegistryValueKind]::String) | Out-Null
-    
+    # When Region is set to one of EU countries, Edge uninstallation is only allowed when parent process caller is either SystemSettings.exe, dllhost.exe, sihost.exe or msiexec.exe
+    # Setting it to non-EU region allows uninstallation from any parent process
+    # US = 244
+    [microsoft.win32.registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Control Panel\DeviceRegion', 'DeviceRegion', 244, [Microsoft.Win32.RegistryValueKind]::DWord) | Out-Null
+    [microsoft.win32.registry]::SetValue('HKEY_USERS\.DEFAULT\Control Panel\International\Geo', 'Nation', 244, [Microsoft.Win32.RegistryValueKind]::String) | Out-Null
+    [microsoft.win32.registry]::SetValue('HKEY_USERS\.DEFAULT\Control Panel\International\Geo', 'Name', "US", [Microsoft.Win32.RegistryValueKind]::String) | Out-Null
+
     $baseKey = 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\EdgeUpdate'
+    Write-Host "[$Mode] Base registry key: $baseKey"
     $registryPath = $baseKey + '\ClientState\' + $Key
 
     if (!(Test-Path -Path $registryPath)) {
@@ -24,20 +29,26 @@ function Uninstall-Process {
     }
 
     Remove-ItemProperty -Path $registryPath -Name "experiment_control_labels" -ErrorAction SilentlyContinue | Out-Null
+    
+    try {
+        # Activates BrowserReplacement and allows uninstallation diretctly from Settings > Apps, even after Edge gets reinstalled
+        # Region must be set to non-EU country for this to work
+        $folderPath = "$env:SystemRoot\SystemApps\Microsoft.MicrosoftEdge_8wekyb3d8bbwe"
 
-    # Needed to activate BrowserReplacement
-    # Not needed if windir is set to an empty string, but keeping it in case Windows Updates reinstalls Edge
-    $folderPath = "$env:SystemRoot\SystemApps\Microsoft.MicrosoftEdge_8wekyb3d8bbwe"
+        if (!(Test-Path -Path $folderPath)) {
+            New-Item -ItemType Directory -Path $folderPath -Force | Out-Null
+        }
+        New-Item -ItemType File -Path $folderPath -Name "MicrosoftEdge.exe" -Force | Out-Null
 
-    if (!(Test-Path -Path $folderPath)) {
-        New-Item -ItemType Directory -Path $folderPath -Force | Out-Null
     }
-    New-Item -ItemType File -Path $folderPath -Name "MicrosoftEdge.exe" -Force | Out-Null
-    #
+    catch {
+        Write-Host "[$Mode] Failed to create fake MicrosoftEdge.exe: $_"
+        return
+    }
+    
 
-    # Setting windir to an empty string allows the Edge uninstallation to work
-    #[microsoft.win32.registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Control\Session Manager\Environment', 'windir', "", [Microsoft.Win32.RegistryValueKind]::ExpandString) | Out-Null
-    #$env:windir = [System.Environment]::GetEnvironmentVariable("windir","Machine")
+    # Setting windir temporarily to an empty string allows the Edge uninstallation to work
+    # "Uninstall allowed: No Windows directory set as env var" (Legacy, not found in newer updates)
     $env:windir = ""
 
     $uninstallString = (Get-ItemProperty -Path $registryPath).UninstallString
@@ -55,13 +66,13 @@ function Uninstall-Process {
         Write-Host "[$Mode] setup.exe not found at: $uninstallString"
         return
     }
-    Start-Process -FilePath $uninstallString -ArgumentList $uninstallArguments -Wait -NoNewWindow -Verbose
 
-    # Restore Nation
+    $process = Start-Process -FilePath $uninstallString -ArgumentList $uninstallArguments -Wait -Verbose -NoNewWindow -PassThru
+    Write-Host "[$Mode] Uninstallation process exit code: $($process.ExitCode)"
+
+    # Restore original region
     [microsoft.win32.registry]::SetValue('HKEY_USERS\.DEFAULT\Control Panel\International\Geo', 'Nation', $originalNation, [Microsoft.Win32.RegistryValueKind]::String) | Out-Null
-
-    # Restore windir
-    #[microsoft.win32.registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Control\Session Manager\Environment', 'windir', '%SystemRoot%', [Microsoft.Win32.RegistryValueKind]::ExpandString) | Out-Null
+    [microsoft.win32.registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Control Panel\DeviceRegion', 'DeviceRegion', $originalNation, [Microsoft.Win32.RegistryValueKind]::DWord) | Out-Null
 
     if ((Get-ItemProperty -Path $baseKey).IsEdgeStableUninstalled -eq 1) {
         Write-Host "[$Mode] Edge Stable has been successfully uninstalled"
@@ -76,8 +87,8 @@ function Uninstall-Edge {
     Uninstall-Process -Key '{56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}'
     
     @( "$env:ProgramData\Microsoft\Windows\Start Menu\Programs",
-       "$env:PUBLIC\Desktop",
-       "$env:USERPROFILE\Desktop" ) | ForEach-Object {
+        "$env:PUBLIC\Desktop",
+        "$env:USERPROFILE\Desktop" ) | ForEach-Object {
         $shortcutPath = Join-Path -Path $_ -ChildPath "Microsoft Edge.lnk"
         if (Test-Path -Path $shortcutPath) {
             Remove-Item -Path $shortcutPath -Force
