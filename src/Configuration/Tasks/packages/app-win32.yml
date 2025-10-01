@@ -11,12 +11,23 @@ actions:
   - !taskKill: {name: "MicrosoftEdge*", errorAction: Ignore, option: "remove-edge"}
   - !taskKill: {name: "setup", errorAction: Ignore, pathContains: "\\Edge", option: "remove-edge"}
 
+  # Setting device region to US (244) allows uninstallation without known parent processes
+  - !powerShell:
+    command: '.\EDGE.ps1 -Mode SetDeviceRegion -DeviceRegion 244'
+    exeDir: true
+    option: "remove-edge"
+
   - !powerShell:
     command: '.\EDGE.ps1 -Mode EdgeBrowser'
     exeDir: true
     runas: currentUserElevated
     option: "remove-edge"
     weight: 40
+
+  - !powerShell:
+    command: '.\EDGE.ps1 -Mode RestoreDeviceRegion'
+    exeDir: true
+    option: "remove-edge"
 
   - !powerShell:
     option: "remove-edge"
@@ -29,9 +40,15 @@ actions:
         'Microsoft.MicrosoftEdgeDevToolsClient',
         'Microsoft.Edge.GameAssist'
       )
-
-  # - !file: {path: "%ProgramFiles(x86)%\\Microsoft\\Edge", option: "remove-edge", weight: 50}
-
+  
+  # In case Revision Tool's removal method fails
+  - !powerShell:
+    option: 'remove-winsxs-ai'
+    exeDir: true
+    errorAction: Ignore
+    weight: 30
+    command: >-
+      .\APPX-REMOVER.ps1 -Packages 'Microsoft.Copilot'
 
   # OneDrive
   - !writeStatus: {status: "Removing OneDrive", option: "remove-onedrive"}
