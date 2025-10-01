@@ -83,7 +83,22 @@ actions:
     command: '.\Set-Theme.ps1 -WallpaperPath "$env:SystemRoot\Web\Wallpaper\MeetRevision\v2\desktop.jpg" -ThemeExportPath "$env:SystemRoot\Resources\Themes\revi.theme" -SystemMode "Dark" -AppMode "Dark"'
     exeDir: true
     runas: currentUserElevated
-    option: "configure-wallpaper"
+    option: "configure-wallpaper, configure-darkmode"
+  
+  - !powerShell:
+    command: '.\Set-Theme.ps1 -WallpaperPath "$env:SystemRoot\Web\Wallpaper\MeetRevision\v2\desktop.jpg" -ThemeExportPath "$env:SystemRoot\Resources\Themes\revi.theme" -SystemMode "Light" -AppMode "Light"'
+    exeDir: true
+    runas: currentUserElevated
+    option: "configure-wallpaper, !configure-darkmode"
+
+
+  # Still necessary to set for W10
+  ## if dark mode is deselected, then revert to light mode
+  - !registryValue: {path: 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize', value: 'AppsUseLightTheme', type: REG_DWORD, data: '0', option: "configure-darkmode", weight: 70}
+  - !registryValue: {path: 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize', value: 'SystemUsesLightTheme', type: REG_DWORD, data: '0', option: "configure-darkmode", weight: 50}
+  - !registryValue: {path: 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize', value: 'AppsUseLightTheme', type: REG_DWORD, data: '1', option: "!configure-darkmode", weight: 70}
+  - !registryValue: {path: 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize', value: 'SystemUsesLightTheme', type: REG_DWORD, data: '1', option: "!configure-darkmode", weight: 50}
+
 
   - !registryValue: 
     path: 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce'
