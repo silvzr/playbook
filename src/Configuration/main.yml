@@ -9,8 +9,10 @@ actions:
   - !task: {path: 'Tasks\registry\os-info\oem-info.yml'}
 
   - !task: {path: 'Tasks\start.yml'}
+ 
   
   - !task: {path: 'Tasks\packages\app-win32.yml'}
+  - !task: {path: 'Tasks\registry\explorer\win-settings.yml'} # Run win-settings tasks early due to SettingsPageVisibility is hardcoded and messes up with the 'winpackage --install ai-removal' command
   # Uninstalling WinSxS packages before app-win32 could leave leftovers
   - !task: {path: 'Tasks\packages\win-sxs.yml'}
   - !task: {path: 'Tasks\packages\appx.yml'}

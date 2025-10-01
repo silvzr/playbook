@@ -11,15 +11,12 @@ actions:
   - !taskKill: {name: "MicrosoftEdge*", errorAction: Ignore, option: "remove-edge"}
   - !taskKill: {name: "setup", errorAction: Ignore, pathContains: "\\Edge", option: "remove-edge"}
 
-  # Remove the new Copilot UWP app before removing Edge to avoid leftovers
+  # Setting device region to US (244) allows uninstallation without known parent processes
   - !powerShell:
-    option: "remove-edge"
+    command: '.\EDGE.ps1 -Mode SetDeviceRegion -DeviceRegion 244'
     exeDir: true
-    errorAction: Ignore
-    weight: 30
-    command: >-
-      .\APPX-REMOVER.ps1 -Packages 'Microsoft.Copilot'
-  
+    option: "remove-edge"
+
   - !powerShell:
     command: '.\EDGE.ps1 -Mode EdgeBrowser'
     exeDir: true
@@ -28,19 +25,30 @@ actions:
     weight: 40
 
   - !powerShell:
+    command: '.\EDGE.ps1 -Mode RestoreDeviceRegion'
+    exeDir: true
+    option: "remove-edge"
+
+  - !powerShell:
     option: "remove-edge"
     exeDir: true
     errorAction: Ignore
     weight: 30
     command: >-
       .\APPX-REMOVER.ps1 -Packages @(
-        'Microsoft.Copilot',
         'Microsoft.MicrosoftEdge',
-        'Microsoft.MicrosoftEdgeDevToolsClient'
+        'Microsoft.MicrosoftEdgeDevToolsClient',
+        'Microsoft.Edge.GameAssist'
       )
-
-  - !file: {path: "%ProgramFiles(x86)%\\Microsoft\\Edge", option: "remove-edge", weight: 50}
-
+  
+  # In case Revision Tool's removal method fails
+  - !powerShell:
+    option: 'remove-winsxs-ai'
+    exeDir: true
+    errorAction: Ignore
+    weight: 30
+    command: >-
+      .\APPX-REMOVER.ps1 -Packages 'Microsoft.Copilot'
 
   # OneDrive
   - !writeStatus: {status: "Removing OneDrive", option: "remove-onedrive"}
@@ -48,13 +56,12 @@ actions:
   - !taskKill: {name: "OneDriveSetup", errorAction: Ignore, option: "remove-onedrive"}
   - !taskKill: {name: "OneDrive*", errorAction: Ignore, option: "remove-onedrive"}
 
-  - !run: {exeDir: true, exe: "ONED.cmd", option: "remove-onedrive", weight: 40}
+  - !run: {exeDir: true, exe: "ONED.cmd", option: "remove-onedrive", oobe: false, iso: false, weight: 40}
   - !file: {path: "%SystemDrive%\\OneDriveTemp", option: "remove-onedrive"}
   - !file: {path: "%ProgramData%\\Microsoft OneDrive", option: "remove-onedrive"}
 
   - !powerShell:
     option: "remove-onedrive"
-    # runas: currentUserElevated
     wait: true
     exeDir: true
     errorAction: Ignore
@@ -64,3 +71,35 @@ actions:
         'OneDrive',
         'microsoft.microsoftskydrive'
       )
+
+  # Teams
+  - !writeStatus: {status: "Removing Teams", option: "remove-teams"}
+  - !taskKill: {name: "Teams", errorAction: Ignore, option: "remove-teams"}
+  - !taskKill: {name: "Update", errorAction: Ignore, option: "remove-teams"}
+  - !taskKill: {name: "ms-teamsupdate", errorAction: Ignore, option: "remove-teams"}
+
+  - !powerShell:
+    option: "remove-teams"
+    wait: true
+    exeDir: true
+    errorAction: Ignore
+    weight: 10
+    command: >-
+      .\APPX-REMOVER.ps1 -Packages @(
+        'MicrosoftTeams',
+        'MSTeams', # New Teams
+        'Flipgrid'
+      )
+  
+  # Microsoft Teams Meeting Add-in for Microsoft Office
+  - !run:
+    option: "remove-teams"
+    wait: true
+    exe: "msiexec.exe"
+    args: "/qn /norestart /X{A7AB73A3-CB10-4AA5-9D38-6AEFFBDE4C91}"
+    weight: 10
+    showError: false
+    runas: currentUserElevated
+
+  # === Prevent automatic Teams installation
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Communications', value: 'ConfigureChatAutoInstall', type: REG_DWORD, data: '0'}

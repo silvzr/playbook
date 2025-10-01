@@ -1,8 +1,61 @@
 param (   
     [Parameter(Mandatory = $true)]
-    [ValidateSet("EdgeBrowser", "WebView", "EdgeUpdate")]
-    [string]$Mode
+    [ValidateSet("EdgeBrowser", "WebView", "EdgeUpdate", "SetDeviceRegion", "RestoreDeviceRegion")]
+    [string]$Mode,
+    
+    [Parameter(Mandatory = $false)]
+    [int]$DeviceRegion = 244  # US (244)
 )
+
+function Set-DeviceRegion {
+    param (
+        [Parameter(Mandatory = $true)]
+        [int]$Region
+    )
+    
+    Write-Host "[SetDeviceRegion] Setting device region to: $Region"
+    
+    try {
+        $originalNation = [microsoft.win32.registry]::GetValue('HKEY_USERS\.DEFAULT\Control Panel\International\Geo', 'Nation', $null)
+        
+        if ($originalNation -ne $null) {
+            [microsoft.win32.registry]::SetValue('HKEY_USERS\.DEFAULT\Control Panel\International\Geo', 'OriginalNation', $originalNation, [Microsoft.Win32.RegistryValueKind]::String) | Out-Null
+            Write-Host "[SetDeviceRegion] Backed up original Nation: $originalNation"
+        }
+        
+        [microsoft.win32.registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Control Panel\DeviceRegion', 'DeviceRegion', $Region, [Microsoft.Win32.RegistryValueKind]::DWord) | Out-Null
+        [microsoft.win32.registry]::SetValue('HKEY_USERS\.DEFAULT\Control Panel\International\Geo', 'Nation', $Region, [Microsoft.Win32.RegistryValueKind]::String) | Out-Null
+        
+        Write-Host "[SetDeviceRegion] Device region successfully set to: $Region"
+    }
+    catch {
+        Write-Host "[SetDeviceRegion] Failed to set device region: $_"
+    }
+}
+
+function Restore-DeviceRegion {
+    Write-Host "[RestoreDeviceRegion] Restoring original device region"
+    
+    try {
+        $originalNation = [microsoft.win32.registry]::GetValue('HKEY_USERS\.DEFAULT\Control Panel\International\Geo', 'OriginalNation', $null)
+        
+        if ($originalNation -ne $null) {
+            [microsoft.win32.registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Control Panel\DeviceRegion', 'DeviceRegion', $originalNation, [Microsoft.Win32.RegistryValueKind]::DWord) | Out-Null
+            [microsoft.win32.registry]::SetValue('HKEY_USERS\.DEFAULT\Control Panel\International\Geo', 'Nation', $originalNation, [Microsoft.Win32.RegistryValueKind]::String) | Out-Null
+            
+            Remove-ItemProperty -Path "HKCU:\Control Panel\International\Geo" -Name "OriginalNation" -ErrorAction SilentlyContinue | Out-Null
+            
+            Write-Host "[RestoreDeviceRegion] Device region and Nation restored to: $originalNation"
+        } else {
+            Write-Host "[RestoreDeviceRegion] No original region value was found to restore, Setting to US (244)"
+            [microsoft.win32.registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Control Panel\DeviceRegion', 'DeviceRegion', 244, [Microsoft.Win32.RegistryValueKind]::DWord) | Out-Null
+            [microsoft.win32.registry]::SetValue('HKEY_USERS\.DEFAULT\Control Panel\International\Geo', 'Nation', 244, [Microsoft.Win32.RegistryValueKind]::String) | Out-Null
+        }
+    }
+    catch {
+        Write-Host "[RestoreDeviceRegion] Failed to restore device region: $_"
+    }
+}
 
 function Uninstall-Process {
     param (
@@ -10,12 +63,25 @@ function Uninstall-Process {
         [string]$Key
     )
 
-    $originalNation = [microsoft.win32.registry]::GetValue('HKEY_USERS\.DEFAULT\Control Panel\International\Geo', 'Nation', [Microsoft.Win32.RegistryValueKind]::String)
+    try {
+        $currentDeviceRegion = [microsoft.win32.registry]::GetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Control Panel\DeviceRegion', 'DeviceRegion', $null)
+        $currentNation = [microsoft.win32.registry]::GetValue('HKEY_USERS\.DEFAULT\Control Panel\International\Geo', 'Nation', $null)
+        
+        if ($currentDeviceRegion -ne 244 -or $currentNation -ne "244") {
+            Write-Host "[$Mode] ERROR: Device region not properly set to US (244). Current DeviceRegion: $currentDeviceRegion, Nation: $currentNation"
+            Write-Host "[$Mode] This is required for Edge uninstallation. Please run SetDeviceRegion mode first with TrustedInstaller privileges."
+            return
+        }
+        
+        Write-Host "[$Mode] Device region verification passed (US=244)"
+    }
+    catch {
+        Write-Host "[$Mode] WARNING: Could not verify device region setting: $_"
+        Write-Host "[$Mode] Proceeding with uninstallation anyway..."
+    }
 
-    # Set Nation to 84 (France) temporarily
-    [microsoft.win32.registry]::SetValue('HKEY_USERS\.DEFAULT\Control Panel\International\Geo', 'Nation', 84, [Microsoft.Win32.RegistryValueKind]::String) | Out-Null
-    
     $baseKey = 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\EdgeUpdate'
+    Write-Host "[$Mode] Base registry key: $baseKey"
     $registryPath = $baseKey + '\ClientState\' + $Key
 
     if (!(Test-Path -Path $registryPath)) {
@@ -24,20 +90,26 @@ function Uninstall-Process {
     }
 
     Remove-ItemProperty -Path $registryPath -Name "experiment_control_labels" -ErrorAction SilentlyContinue | Out-Null
+    
+    try {
+        # Activates BrowserReplacement and allows uninstallation directly from Settings > Apps, even after Edge gets reinstalled
+        # Region must be set to non-EU country for this to work (handled separately with TrustedInstaller)
+        $folderPath = "$env:SystemRoot\SystemApps\Microsoft.MicrosoftEdge_8wekyb3d8bbwe"
 
-    # Needed to activate BrowserReplacement
-    # Not needed if windir is set to an empty string, but keeping it in case Windows Updates reinstalls Edge
-    $folderPath = "$env:SystemRoot\SystemApps\Microsoft.MicrosoftEdge_8wekyb3d8bbwe"
+        if (!(Test-Path -Path $folderPath)) {
+            New-Item -ItemType Directory -Path $folderPath -Force | Out-Null
+        }
+        New-Item -ItemType File -Path $folderPath -Name "MicrosoftEdge.exe" -Force | Out-Null
 
-    if (!(Test-Path -Path $folderPath)) {
-        New-Item -ItemType Directory -Path $folderPath -Force | Out-Null
     }
-    New-Item -ItemType File -Path $folderPath -Name "MicrosoftEdge.exe" -Force | Out-Null
-    #
+    catch {
+        Write-Host "[$Mode] Failed to create fake MicrosoftEdge.exe: $_"
+        return
+    }
+    
 
-    # Setting windir to an empty string allows the Edge uninstallation to work
-    #[microsoft.win32.registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Control\Session Manager\Environment', 'windir', "", [Microsoft.Win32.RegistryValueKind]::ExpandString) | Out-Null
-    #$env:windir = [System.Environment]::GetEnvironmentVariable("windir","Machine")
+    # Setting windir temporarily to an empty string allows the Edge uninstallation to work
+    # "Uninstall allowed: No Windows directory set as env var" (Legacy, not found in newer updates)
     $env:windir = ""
 
     $uninstallString = (Get-ItemProperty -Path $registryPath).UninstallString
@@ -55,13 +127,9 @@ function Uninstall-Process {
         Write-Host "[$Mode] setup.exe not found at: $uninstallString"
         return
     }
-    Start-Process -FilePath $uninstallString -ArgumentList $uninstallArguments -Wait -NoNewWindow -Verbose
 
-    # Restore Nation
-    [microsoft.win32.registry]::SetValue('HKEY_USERS\.DEFAULT\Control Panel\International\Geo', 'Nation', $originalNation, [Microsoft.Win32.RegistryValueKind]::String) | Out-Null
-
-    # Restore windir
-    #[microsoft.win32.registry]::SetValue('HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Control\Session Manager\Environment', 'windir', '%SystemRoot%', [Microsoft.Win32.RegistryValueKind]::ExpandString) | Out-Null
+    $process = Start-Process -FilePath $uninstallString -ArgumentList $uninstallArguments -Wait -Verbose -NoNewWindow -PassThru
+    Write-Host "[$Mode] Uninstallation process exit code: $($process.ExitCode)"
 
     if ((Get-ItemProperty -Path $baseKey).IsEdgeStableUninstalled -eq 1) {
         Write-Host "[$Mode] Edge Stable has been successfully uninstalled"
@@ -76,8 +144,8 @@ function Uninstall-Edge {
     Uninstall-Process -Key '{56EB18F8-B008-4CBD-B6D2-8C97FE7E9062}'
     
     @( "$env:ProgramData\Microsoft\Windows\Start Menu\Programs",
-       "$env:PUBLIC\Desktop",
-       "$env:USERPROFILE\Desktop" ) | ForEach-Object {
+        "$env:PUBLIC\Desktop",
+        "$env:USERPROFILE\Desktop" ) | ForEach-Object {
         $shortcutPath = Join-Path -Path $_ -ChildPath "Microsoft Edge.lnk"
         if (Test-Path -Path $shortcutPath) {
             Remove-Item -Path $shortcutPath -Force
@@ -116,7 +184,9 @@ function Uninstall-EdgeUpdate {
 
 switch ($Mode) {
     "EdgeBrowser" { Uninstall-Edge }
-    # "WebView" { Uninstall-WebView }
-    # "EdgeUpdate" { Uninstall-EdgeUpdate }
+    "WebView" { Uninstall-WebView }
+    "EdgeUpdate" { Uninstall-EdgeUpdate }
+    "SetDeviceRegion" { Set-DeviceRegion -Region $DeviceRegion }
+    "RestoreDeviceRegion" { Restore-DeviceRegion }
     default { Write-Host "Invalid mode: $Mode" }
 }

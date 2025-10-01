@@ -47,9 +47,6 @@ actions:
   # === Do not allow web search - Enabled
   - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search', value: 'DisableWebSearch', type: REG_DWORD, data: '1'}
 
-  # === Set the SafeSearch setting for Search - Off (Disabled)
-  - !registryValue: {path: 'HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search', value: 'ConnectedSearchSafeSearch', type: REG_DWORD, data: '3'}
-
   # === Set what information is shared in Search - Anonymous info
   # ------> Anonymous info: Share usage information but don't share search history, Microsoft account info or specific location
   # ------> https://admx.help/?Category=Windows_11_2022&Policy=FullArmor.Policies.3B9EA2B5_A1D1_4CD5_9EDE_75B22990BC21::SearchPrivacy

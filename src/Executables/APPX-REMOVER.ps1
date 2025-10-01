@@ -1,6 +1,8 @@
 param (
-    [Parameter(Mandatory=$true)]
-    [string[]]$Packages
+    [Parameter(Mandatory = $true)]
+    [string[]]$Packages,
+    [Parameter(Mandatory = $false)]
+    [switch]$Unregister = $false
 )
 
 $baseRegistryPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore"
@@ -39,11 +41,23 @@ foreach ($package in $Packages) {
             New-Item -Path $endOfLifePath -Force
 
             # Errors may occur if the package is not added to the EndOfLife registry key for every user who has it installed 
-            Remove-AppxPackage -Package $fullPackageName -User $userSid
+            if ($Unregister) {
+                Remove-AppxPackage -Package $fullPackageName -User $userSid -PreserveRoamableApplicationData
+            }
+            else {
+                Remove-AppxPackage -Package $fullPackageName -User $userSid
+            }
+
         }
 
         # Second attempt
         # An APPX package can be installed for multiple users, and when uninstallation is performed for each or all users, its status may appear as "Staged" or "Installed(pending removal)" for certain users. Therefore, a second attempt is needed to remove the package completely
-        Remove-AppxPackage -Package $fullPackageName -AllUsers
+        if ($Unregister) {
+            Remove-AppxPackage -Package $fullPackageName -AllUsers -PreserveRoamableApplicationData
+        }
+        else {
+            Remove-AppxPackage -Package $fullPackageName -AllUsers
+        }
+
     }
 }
