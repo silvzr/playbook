@@ -56,6 +56,16 @@ actions:
   - !run: {exe: "powercfg", args: "-setacvalueindex scheme_current sub_processor CPMINCORES1 100"} # on hybrid CPUs, '1' at the end of the setting name is for P-cores
   - !run: {exe: "powercfg", args: "/setactive scheme_current"}
 
+  - !writeStatus: {status: "Installing VCRedist"}
+  - !download: 
+    url: 'https://aka.ms/vs/17/release/vc_redist.x64.exe'
+    destination: "vc_redist.x64.exe"
+    overwrite: true
+  - !run:
+    exeDir: true
+    exe: "vc_redist.x64.exe"
+    args: '/quiet /norestart'
+
   - !writeStatus: {status: 'Installing Revision Tool'}
   - !download: 
     url: 'https://github.com/meetrevision/revision-tool/releases/latest/download/RevisionTool-Setup.exe'
