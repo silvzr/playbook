@@ -69,3 +69,7 @@ actions:
   # == UCPD velocity - Disabled
   - !service: {name: 'UCPD', operation: change, startup: 4}
   - !powerShell: {command: "Disable-ScheduledTask -TaskPath '\\Microsoft\\Windows\\AppxDeploymentClient' -TaskName 'UCPD velocity'"}
+
+  # == condrv - Automatic
+  # -----> #184 This is not ReviOS related, but setting to Automatic fixes error 3489660986 (0xd000003a)
+  - !service: {name: 'condrv', operation: change, startup: 2} 
