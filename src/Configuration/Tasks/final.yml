@@ -106,7 +106,8 @@ actions:
     type: REG_SZ
     oobe: only
     data: 'cmd /c "%SystemRoot%\Web\Wallpaper\MeetRevision\WallpaperStartup.cmd"'
-
+    option: "configure-wallpaper"
+    
   # Necessary to refresh start menu entries etc.
   - !appx: {operation: clearCache, name: '*Client.CBS*'}
   - !appx: {operation: clearCache, name: '*StartMenuExperienceHost*', option: "remove-pinned-items-startmenu"}
