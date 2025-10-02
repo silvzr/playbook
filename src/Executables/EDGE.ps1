@@ -63,23 +63,6 @@ function Uninstall-Process {
         [string]$Key
     )
 
-    try {
-        $currentDeviceRegion = [microsoft.win32.registry]::GetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Control Panel\DeviceRegion', 'DeviceRegion', $null)
-        $currentNation = [microsoft.win32.registry]::GetValue('HKEY_USERS\.DEFAULT\Control Panel\International\Geo', 'Nation', $null)
-        
-        if ($currentDeviceRegion -ne 244 -or $currentNation -ne "244") {
-            Write-Host "[$Mode] ERROR: Device region not properly set to US (244). Current DeviceRegion: $currentDeviceRegion, Nation: $currentNation"
-            Write-Host "[$Mode] This is required for Edge uninstallation. Please run SetDeviceRegion mode first with TrustedInstaller privileges."
-            return
-        }
-        
-        Write-Host "[$Mode] Device region verification passed (US=244)"
-    }
-    catch {
-        Write-Host "[$Mode] WARNING: Could not verify device region setting: $_"
-        Write-Host "[$Mode] Proceeding with uninstallation anyway..."
-    }
-
     $baseKey = 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\EdgeUpdate'
     Write-Host "[$Mode] Base registry key: $baseKey"
     $registryPath = $baseKey + '\ClientState\' + $Key
