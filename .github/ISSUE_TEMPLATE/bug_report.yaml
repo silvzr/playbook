@@ -55,10 +55,12 @@ body:
       value: |
         - OS Build Number & Edition: `type here`
         - ReviOS Version: `type here`
+        - ISO Injection: `type here`
         - Specs: `type here`
       placeholder: |
-        - OS Build Number & Edition: `19045.3633, Home`
-        - ReviOS version: `23.10`
+        - OS Build Number & Edition: `26200.6584, Home`
+        - ReviOS version: `25.10`
+        - ISO Injection: `Yes`
         - Specs: `PC, Intel Core i5-10400, 16GB RAM, NVIDIA GeForce GTX 1650`
   
   - type: textarea
