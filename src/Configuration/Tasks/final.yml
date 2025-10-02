@@ -83,13 +83,13 @@ actions:
     command: '.\Set-Theme.ps1 -WallpaperPath "$env:SystemRoot\Web\Wallpaper\MeetRevision\v2\desktop.jpg" -ThemeExportPath "$env:SystemRoot\Resources\Themes\revi.theme" -SystemMode "Dark" -AppMode "Dark"'
     exeDir: true
     runas: currentUserElevated
-    option: "configure-wallpaper, configure-darkmode"
+    options: ["configure-wallpaper", "configure-darkmode"]
   
   - !powerShell:
     command: '.\Set-Theme.ps1 -WallpaperPath "$env:SystemRoot\Web\Wallpaper\MeetRevision\v2\desktop.jpg" -ThemeExportPath "$env:SystemRoot\Resources\Themes\revi.theme" -SystemMode "Light" -AppMode "Light"'
     exeDir: true
     runas: currentUserElevated
-    option: "configure-wallpaper, !configure-darkmode"
+    options: ["configure-wallpaper", "!configure-darkmode"]
 
 
   # Still necessary to set for W10
