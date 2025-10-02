@@ -28,7 +28,7 @@
 0.0.0.0 vortex-win.data.microsoft.com
 0.0.0.0 watson.events.data.microsoft.com
 0.0.0.0 activity.windows.com
-0.0.0.0 browser.events.data.microsoft.com
+#0.0.0.0 browser.events.data.microsoft.com     - breaks Visual Studio Download page
 0.0.0.0 outlookads.live.com
 
 # Windows Error Reporting
