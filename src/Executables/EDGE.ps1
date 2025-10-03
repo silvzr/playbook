@@ -18,7 +18,7 @@ function Set-DeviceRegion {
     try {
         $originalNation = [microsoft.win32.registry]::GetValue('HKEY_USERS\.DEFAULT\Control Panel\International\Geo', 'Nation', $null)
         
-        if ($originalNation -ne $null) {
+        if ($null -ne $originalNation) {
             [microsoft.win32.registry]::SetValue('HKEY_USERS\.DEFAULT\Control Panel\International\Geo', 'OriginalNation', $originalNation, [Microsoft.Win32.RegistryValueKind]::String) | Out-Null
             Write-Host "[SetDeviceRegion] Backed up original Nation: $originalNation"
         }
@@ -39,7 +39,7 @@ function Restore-DeviceRegion {
     try {
         $originalNation = [microsoft.win32.registry]::GetValue('HKEY_USERS\.DEFAULT\Control Panel\International\Geo', 'OriginalNation', $null)
         
-        if ($originalNation -ne $null) {
+        if ($null -ne $originalNation) {
             [microsoft.win32.registry]::SetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Control Panel\DeviceRegion', 'DeviceRegion', $originalNation, [Microsoft.Win32.RegistryValueKind]::DWord) | Out-Null
             [microsoft.win32.registry]::SetValue('HKEY_USERS\.DEFAULT\Control Panel\International\Geo', 'Nation', $originalNation, [Microsoft.Win32.RegistryValueKind]::String) | Out-Null
             
@@ -62,23 +62,6 @@ function Uninstall-Process {
         [Parameter(Mandatory = $true)]
         [string]$Key
     )
-
-    try {
-        $currentDeviceRegion = [microsoft.win32.registry]::GetValue('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Control Panel\DeviceRegion', 'DeviceRegion', $null)
-        $currentNation = [microsoft.win32.registry]::GetValue('HKEY_USERS\.DEFAULT\Control Panel\International\Geo', 'Nation', $null)
-        
-        if ($currentDeviceRegion -ne 244 -or $currentNation -ne "244") {
-            Write-Host "[$Mode] ERROR: Device region not properly set to US (244). Current DeviceRegion: $currentDeviceRegion, Nation: $currentNation"
-            Write-Host "[$Mode] This is required for Edge uninstallation. Please run SetDeviceRegion mode first with TrustedInstaller privileges."
-            return
-        }
-        
-        Write-Host "[$Mode] Device region verification passed (US=244)"
-    }
-    catch {
-        Write-Host "[$Mode] WARNING: Could not verify device region setting: $_"
-        Write-Host "[$Mode] Proceeding with uninstallation anyway..."
-    }
 
     $baseKey = 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\EdgeUpdate'
     Write-Host "[$Mode] Base registry key: $baseKey"

@@ -12,6 +12,10 @@ actions:
   - !taskKill: {name: "setup", errorAction: Ignore, pathContains: "\\Edge", option: "remove-edge"}
 
   # Setting device region to US (244) allows uninstallation without known parent processes
+
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Control Panel\DeviceRegion', value: 'DeviceRegion', type: REG_DWORD, data: '244', option: "remove-edge", iso: only}
+  - !registryValue: {path: 'HKU\.DEFAULT\Control Panel\International\Geo', value: 'Nation', type: REG_SZ, data: '244', option: "remove-edge", iso: only}
+
   - !powerShell:
     command: '.\EDGE.ps1 -Mode SetDeviceRegion -DeviceRegion 244'
     exeDir: true
