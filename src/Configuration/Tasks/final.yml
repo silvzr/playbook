@@ -79,17 +79,28 @@ actions:
     exeDir: true
     option: "configure-wallpaper"
 
+  # === Themes
+
   - !powerShell:
-    command: '.\Set-Theme.ps1 -WallpaperPath "$env:SystemRoot\Web\Wallpaper\MeetRevision\v2\desktop.jpg" -ThemeExportPath "$env:SystemRoot\Resources\Themes\revi.theme" -SystemMode "Dark" -AppMode "Dark"'
+    command: '.\\Set-Theme.ps1 -Path (Join-Path $env:SystemRoot "Resources\\Themes\\dark.theme")'
     exeDir: true
     runas: currentUserElevated
-    options: ["configure-wallpaper", "configure-darkmode"]
-  
+    option: "!configure-wallpaper"
+    options: ["configure-darkmode"]
+
   - !powerShell:
-    command: '.\Set-Theme.ps1 -WallpaperPath "$env:SystemRoot\Web\Wallpaper\MeetRevision\v2\desktop.jpg" -ThemeExportPath "$env:SystemRoot\Resources\Themes\revi.theme" -SystemMode "Light" -AppMode "Light"'
+    command: ".\\Set-Theme.ps1 -New @{ WallpaperPath = (Join-Path $env:SystemRoot 'Web\\Wallpaper\\MeetRevision\\v2\\desktop.jpg'); ThemeExportPath = (Join-Path $env:SystemRoot 'Resources\\Themes\\revi.theme'); SystemMode = 'Light'; AppMode = 'Light' }"
     exeDir: true
     runas: currentUserElevated
-    options: ["configure-wallpaper", "!configure-darkmode"]
+    option: "!configure-darkmode"
+    options: ["configure-wallpaper"]
+
+  - !powerShell:
+    command: ".\\Set-Theme.ps1 -New @{ WallpaperPath = (Join-Path $env:SystemRoot 'Web\\Wallpaper\\MeetRevision\\v2\\desktop.jpg'); ThemeExportPath = (Join-Path $env:SystemRoot 'Resources\\Themes\\revi.theme'); SystemMode = 'Dark'; AppMode = 'Dark' }"
+    exeDir: true
+    runas: currentUserElevated
+    option: "configure-darkmode"
+    options: ["configure-wallpaper"]
 
 
   # Still necessary to set for W10

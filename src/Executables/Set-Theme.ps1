@@ -1,14 +1,9 @@
 param (
-    [Parameter(Mandatory = $true)]
-    [string]$WallpaperPath,
+    [Parameter(Mandatory = $true, ParameterSetName = 'SetExistingTheme')]
+    [string]$Path,
 
-    [string]$ThemeExportPath = "$env:SystemRoot\Resources\Themes\revi.theme",
-
-    [ValidateSet("Dark", "Light")]
-    [string]$SystemMode = "Dark",
-
-    [ValidateSet("Dark", "Light")]
-    [string]$AppMode = "Dark"
+    [Parameter(Mandatory = $true, ParameterSetName = 'NewCustomTheme')]
+    [hashtable]$New
 )
 
 if (-not ([Security.Principal.WindowsPrincipal] `
@@ -18,42 +13,88 @@ if (-not ([Security.Principal.WindowsPrincipal] `
     exit 1
 }
 
-if (-not (Test-Path $WallpaperPath)) {
-    Write-Error "Wallpaper file not found at: $WallpaperPath"
-    exit 1
-}
-
-$themesDir = "$env:SystemRoot\Resources\Themes"
-$baseTheme = Join-Path $themesDir "aero.theme"
-if (-not (Test-Path $baseTheme)) {
-    Write-Error "Base theme not found at: $baseTheme"
-    exit 1
-}
-
-Copy-Item -Path $baseTheme -Destination $ThemeExportPath -Force
-
-(Get-Content $ThemeExportPath) | ForEach-Object {
-    switch -Regex ($_) {
-        '^Wallpaper=' { "Wallpaper=$WallpaperPath" }
-        '^SystemMode=' { "SystemMode=$SystemMode" }
-        '^AppMode=' { "AppMode=$AppMode" }
-        default { $_ }
+function Set-ExistingTheme {
+    param ([string]$ThemePath)
+    
+    if (-not (Test-Path $ThemePath)) {
+        Write-Error "Theme file not found at: $ThemePath"
+        exit 1
     }
-} | Set-Content $ThemeExportPath
-Write-Host "Custom theme created at $ThemeExportPath"
-
-$regPathTemplate = "Registry::HKEY_USERS\{0}\Software\Microsoft\Windows\CurrentVersion\Themes"
-
-Get-ChildItem Registry::HKEY_USERS | ForEach-Object {
-    $sid = $_.PSChildName
-    if ($sid -notmatch '(_Classes|^\.DEFAULT$)') {
-        $themeKey = $regPathTemplate -f $sid
-        if (-not (Test-Path $themeKey)) {
-            New-Item -Path $themeKey -Force | Out-Null
+    
+    Write-Host "Applying existing theme from: $ThemePath"
+    
+    $regPathTemplate = "Registry::HKEY_USERS\{0}\Software\Microsoft\Windows\CurrentVersion\Themes"
+    
+    Get-ChildItem Registry::HKEY_USERS | ForEach-Object {
+        $sid = $_.PSChildName
+        if ($sid -notmatch '(_Classes|^\.DEFAULT$)') {
+            $themeKey = $regPathTemplate -f $sid
+            if (-not (Test-Path $themeKey)) {
+                New-Item -Path $themeKey -Force | Out-Null
+            }
+            Set-ItemProperty -Path $themeKey -Name "CurrentTheme" -Value $ThemePath
+            Write-Host "Theme assigned for user SID: $sid"
         }
-        Set-ItemProperty -Path $themeKey -Name "CurrentTheme" -Value $ThemeExportPath
-        Write-Host "Theme assigned for user SID: $sid"
     }
+    
+    Start-Process -FilePath $ThemePath
 }
 
-Start-Process -FilePath $ThemeExportPath
+function New-CustomTheme {
+    param ([hashtable]$Config)
+    
+    if (-not $Config.ContainsKey('WallpaperPath')) {
+        Write-Error "WallpaperPath is required in the hashtable"
+        exit 1
+    }
+    
+    $wallpaperPath = $Config['WallpaperPath']
+    $themeExportPath = if ($Config.ContainsKey('ThemeExportPath')) { $Config['ThemeExportPath'] } else { "$env:SystemRoot\Resources\Themes\revi.theme" }
+    $systemMode = if ($Config.ContainsKey('SystemMode')) { $Config['SystemMode'] } else { 'Dark' }
+    $appMode = if ($Config.ContainsKey('AppMode')) { $Config['AppMode'] } else { 'Dark' }
+    
+    if ($systemMode -notin @('Dark', 'Light')) {
+        Write-Error "SystemMode must be 'Dark' or 'Light'"
+        exit 1
+    }
+    if ($appMode -notin @('Dark', 'Light')) {
+        Write-Error "AppMode must be 'Dark' or 'Light'"
+        exit 1
+    }
+    
+    if (-not (Test-Path $wallpaperPath)) {
+        Write-Error "Wallpaper file not found at: $wallpaperPath"
+        exit 1
+    }
+    
+    $themesDir = "$env:SystemRoot\Resources\Themes"
+    $baseTheme = if ($systemMode -eq 'Dark') { "$themesDir\dark.theme" } else { "$themesDir\aero.theme" }
+    if (-not (Test-Path $baseTheme)) {
+        Write-Error "Base theme not found at: $baseTheme"
+        exit 1
+    }
+    
+    Copy-Item -Path $baseTheme -Destination $themeExportPath -Force
+    
+    (Get-Content $themeExportPath) | ForEach-Object {
+        switch -Regex ($_) {
+            '^Wallpaper=' { "Wallpaper=$wallpaperPath" }
+            '^SystemMode=' { "SystemMode=$systemMode" }
+            '^AppMode=' { "AppMode=$appMode" }
+            default { $_ }
+        }
+    } | Set-Content $themeExportPath
+    
+    Write-Host "Custom theme created at $themeExportPath"
+    
+    Set-ExistingTheme -ThemePath $themeExportPath
+}
+
+switch ($PSCmdlet.ParameterSetName) {
+    'SetExistingTheme' {
+        Set-ExistingTheme -ThemePath $Path
+    }
+    'NewCustomTheme' {
+        New-CustomTheme -Config $New
+    }
+}
